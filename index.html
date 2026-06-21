@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Commentaires LinkedIn</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0A66C2">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f3f2ef 0%, #e8e6e1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #0A66C2;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header h1 span {
+            font-size: 2.2rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #0A66C2, #0077B5);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #0A66C2;
+            box-shadow: 0 0 0 4px rgba(10, 102, 194, 0.1);
+        }
+
+        textarea::placeholder {
+            color: #999;
+        }
+
+        .select-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .select-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #0A66C2;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #0A66C2, #0077B5);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(10, 102, 194, 0.3);
+        }
+
+        .btn-generate:active {
+            transform: translateY(0);
+        }
+
+        .btn-generate:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .comment-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s;
+        }
+
+        .comment-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .card-number {
+            background: #0A66C2;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            background: #f9f9f9;
+            margin-bottom: 12px;
+        }
+
+        .comment-textarea.editing {
+            background: white;
+            border-color: #0A66C2;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-edit {
+            background: white;
+            color: #333;
+        }
+
+        .btn-edit:hover {
+            border-color: #0A66C2;
+            color: #0A66C2;
+        }
+
+        .btn-edit.active {
+            background: #0A66C2;
+            color: white;
+            border-color: #0A66C2;
+        }
+
+        .btn-copy {
+            background: #0A66C2;
+            color: white;
+            border-color: #0A66C2;
+        }
+
+        .btn-copy:hover {
+            background: #0077B5;
+        }
+
+        .btn-copy.copied {
+            background: #10B981;
+            border-color: #10B981;
+        }
+
+        .error-message {
+            background: #FEE2E2;
+            color: #DC2626;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #888;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><span>💬</span> Générateur de Commentaires LinkedIn</h1>
+            <span class="badge">Powered by GPT-4</span>
+        </header>
+
+        <div class="form-card">
+            <div class="form-group">
+                <label for="postInput">📝 Contenu du post LinkedIn</label>
+                <textarea 
+                    id="postInput" 
+                    placeholder="Collez ici le contenu du post LinkedIn que vous souhaitez commenter..."
+                ></textarea>
+            </div>
+
+            <div class="select-row">
+                <div class="form-group">
+                    <label for="toneSelect">🎯 Ton du commentaire</label>
+                    <select id="toneSelect">
+                        <option value="Expert">Expert</option>
+                        <option value="Accessible">Accessible</option>
+                        <option value="Dynamique">Dynamique</option>
+                        <option value="Corporate">Corporate</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="goalSelect">🎯 Objectif</label>
+                    <select id="goalSelect">
+                        <option value="Prospection B2B">Prospection B2B</option>
+                        <option value="Personal Branding">Personal Branding</option>
+                        <option value="Les deux">Les deux</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-generate" id="generateBtn" onclick="generateComments()">
+                <span id="btnText">🚀 Générer 3 Commentaires</span>
+                <div class="spinner" id="spinner" style="display: none;"></div>
+            </button>
+
+            <div class="error-message" id="errorMessage">
+                ❌ Erreur lors de la génération. Veuillez réessayer.
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">✨ Vos 3 commentaires personnalisés</div>
+            
+            <div class="results-grid">
+                <div class="comment-card">
+                    <div class="card-header">
+                        <span class="card-number">Commentaire 1</span>
+                    </div>
+                    <textarea class="comment-textarea" id="comment1" readonly></textarea>
+                    <div class="card-actions">
+                        <button class="btn-action btn-edit" id="editBtn1" onclick="toggleEdit(1)">✏️ Modifier</button>
+                        <button class="btn-action btn-copy" id="copyBtn1" onclick="copyComment(1)">📋 Copier</button>
+                    </div>
+                </div>
+
+                <div class="comment-card">
+                    <div class="card-header">
+                        <span class="card-number">Commentaire 2</span>
+                    </div>
+                    <textarea class="comment-textarea" id="comment2" readonly></textarea>
+                    <div class="card-actions">
+                        <button class="btn-action btn-edit" id="editBtn2" onclick="toggleEdit(2)">✏️ Modifier</button>
+                        <button class="btn-action btn-copy" id="copyBtn2" onclick="copyComment(2)">📋 Copier</button>
+                    </div>
+                </div>
+
+                <div class="comment-card">
+                    <div class="card-header">
+                        <span class="card-number">Commentaire 3</span>
+                    </div>
+                    <textarea class="comment-textarea" id="comment3" readonly></textarea>
+                    <div class="card-actions">
+                        <button class="btn-action btn-edit" id="editBtn3" onclick="toggleEdit(3)">✏️ Modifier</button>
+                        <button class="btn-action btn-copy" id="copyBtn3" onclick="copyComment(3)">📋 Copier</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            Développé avec 💙 pour optimiser votre présence LinkedIn
+        </footer>
+    </div>
+
+    <script>
+        // Plus de clé API ici ! On appelle notre propre serveur (/api/generate),
+        // qui lui contacte OpenAI avec la clé gardée en sécurité côté serveur.
+
+        const editStates = { 1: false, 2: false, 3: false };
+
+        async function generateComments() {
+            const postContent = document.getElementById('postInput').value.trim();
+            const tone = document.getElementById('toneSelect').value;
+            const goal = document.getElementById('goalSelect').value;
+            const generateBtn = document.getElementById('generateBtn');
+            const btnText = document.getElementById('btnText');
+            const spinner = document.getElementById('spinner');
+            const errorMessage = document.getElementById('errorMessage');
+            const resultsSection = document.getElementById('resultsSection');
+
+            if (!postContent) {
+                alert('Veuillez coller le contenu d\'un post LinkedIn.');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            btnText.textContent = 'Génération en cours...';
+            spinner.style.display = 'block';
+            errorMessage.classList.remove('active');
+            resultsSection.classList.remove('active');
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ postContent, tone, goal })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur API');
+                }
+
+                const data = await response.json();
+                const comments = data.comments;
+
+                document.getElementById('comment1').value = comments[0] || '';
+                document.getElementById('comment2').value = comments[1] || '';
+                document.getElementById('comment3').value = comments[2] || '';
+
+                resultsSection.classList.add('active');
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                errorMessage.classList.add('active');
+            } finally {
+                generateBtn.disabled = false;
+                btnText.textContent = '🚀 Générer 3 Commentaires';
+                spinner.style.display = 'none';
+            }
+        }
+
+        function toggleEdit(commentNumber) {
+            const textarea = document.getElementById(`comment${commentNumber}`);
+            const editBtn = document.getElementById(`editBtn${commentNumber}`);
+            
+            editStates[commentNumber] = !editStates[commentNumber];
+            
+            if (editStates[commentNumber]) {
+                textarea.readOnly = false;
+                textarea.classList.add('editing');
+                editBtn.classList.add('active');
+                editBtn.innerHTML = '✓ Terminé';
+                textarea.focus();
+            } else {
+                textarea.readOnly = true;
+                textarea.classList.remove('editing');
+                editBtn.classList.remove('active');
+                editBtn.innerHTML = '✏️ Modifier';
+            }
+        }
+
+        function copyComment(commentNumber) {
+            const textarea = document.getElementById(`comment${commentNumber}`);
+            const copyBtn = document.getElementById(`copyBtn${commentNumber}`);
+            
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                copyBtn.innerHTML = '✓ Copié !';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = '📋 Copier';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Erreur de copie:', err);
+                textarea.select();
+                document.execCommand('copy');
+                copyBtn.innerHTML = '✓ Copié !';
+                copyBtn.classList.add('copied');
+                setTimeout(() => {
+                    copyBtn.innerHTML = '📋 Copier';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
