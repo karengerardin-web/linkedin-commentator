@@ -286,6 +286,7 @@
                         <option value="Accessible">Accessible</option>
                         <option value="Dynamique">Dynamique</option>
                         <option value="Corporate">Corporate</option>
+                        <option value="Humour">Humour</option>
                     </select>
                 </div>
 
@@ -345,6 +346,7 @@ RÈGLES DE GÉNÉRATION:
 - Chaque commentaire doit être unique et distinct des autres
 - Longueur: entre 80 et 150 caractères
 - Ton: ${tone} - adapte le vocabulaire et le style en conséquence
+  - Si "Humour": utilise une touche d'humour léger et professionnel (jeu de mots, clin d'œil, légère autodérision), jamais sarcastique ni moqueur envers l'auteur du post, et reste pertinent par rapport au sujet du post
 - Objectif: ${goal}
   - Si "Prospection B2B": ajoute subtilement une question ouverte ou une invitation au dialogue
   - Si "Personal Branding": ajoute une touche personnelle ou une expérience vécue
